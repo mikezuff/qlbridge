@@ -46,6 +46,21 @@ func verifyIdentity(t *testing.T, input, expects string, isIdentity bool) {
 	}
 }
 
+func verifyIdentityDoubleQuoted(t *testing.T, input, expects string, isIdentity bool) {
+	dialect := *SqlDialect
+	dialect.IdentityQuoting = []byte{'[', '`', '"'}
+
+	l := NewLexer(input, &dialect)
+	assert.Equal(t, isIdentity, l.isIdentity(), "Expected %s to be %v identity", input, isIdentity)
+	LexIdentifier(l)
+	tok := l.NextToken()
+	if isIdentity {
+		//assert.Nil(t, tok.Err(l))
+		assert.Equal(t, TokenIdentity, tok.T)
+		assert.Equal(t, expects, tok.V)
+	}
+}
+
 func TestLexer(t *testing.T) {
 	orig := Trace
 	Trace = true
@@ -93,6 +108,7 @@ func TestLexIdentity(t *testing.T) {
 	verifyIdentity(t, "`☺☻☹`", "☺☻☹", true)
 	verifyIdentity(t, "`日a本b語ç日ð本Ê語þ日¥本¼語i日©`", "日a本b語ç日ð本Ê語þ日¥本¼語i日©", true)
 	verifyIdentity(t, `"hello"`, "", false)
+	verifyIdentityDoubleQuoted(t, `"hello"`, "hello", true)
 	verifyIdentity(t, `[table name]`, "table name", true)
 	verifyIdentity(t, `table_name`, "table_name", true)
 	verifyIdentity(t, "`table_name`", "table_name", true)

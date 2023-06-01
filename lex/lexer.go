@@ -1449,6 +1449,8 @@ func lexIdentifierOfTypeNoWs(l *Lexer, shouldIgnore bool, forToken TokenType) St
 				}
 			case firstChar == '\'' && nextChar == '\'':
 				break identityForLoop
+			case firstChar == '"' && nextChar == '"':
+				break identityForLoop
 			case firstChar == '`' && nextChar == '`':
 				if l.PeekX(2) == ".`" {
 					// Identity of form   `schema`.`table`
